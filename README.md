@@ -1,21 +1,21 @@
 # OpenLab
 
-`OpenLab` 是从 `Claude&GPTlocalinprove-wt-step-8-search-autoresearch-pilot` 中拆出的独立项目。
+`OpenLab` 是一个独立的本地 intake 工具仓库，用来接收项目目录并生成首轮 inventory 与结构化分析结果。
 
-用途：
+它从 `Claude&GPTlocalinprove-wt-step-8-search-autoresearch-pilot` 中拆出，目的很直接：
 
-- 接收整个项目文件夹上传
-- 或直接指定本机项目路径
-- 生成首轮项目 inventory 和结构化分析结果
+- 让 Step 8 搜索实验继续保持单一职责
+- 把“项目接入与首轮结构分析”变成单独能力
 
-当前目录结构：
+## 适合做什么
 
-- `docs/`
-- `lab/`
-- `lab-data/`
-- `tools/`
+- 上传整个项目文件夹做首轮扫描
+- 直接指定本机路径创建任务
+- 为每个任务生成独立 workspace、日志和报告
 
-常用启动方式：
+## 快速开始
+
+启动本地服务：
 
 ```powershell
 pwsh -File tools/run-open-lab.ps1
@@ -25,13 +25,58 @@ pwsh -File tools/run-open-lab.ps1
 
 - `http://127.0.0.1:8765`
 
-常用清理方式：
+直接对本机项目路径做 intake：
+
+```powershell
+python lab/open_lab.py intake-local --source-path "F:\01-Projects\SomeProject" --title "SomeProject" --goal "首轮结构分析"
+```
+
+清理任务：
 
 ```powershell
 pwsh -File tools/lab-cleanup-task.ps1 -TaskId <task_id>
+pwsh -File tools/lab-cleanup-task.ps1 -TaskId <task_id> -DropInput
 ```
 
-说明：
+## 当前输出
 
-- 这个目录在 2026-04-08 从 Step 8 搜索实验 worktree 中独立出来，目的是让搜索实验继续保持单一职责。
-- 历史 intake 数据保留在 `lab-data/tasks/`。
+每个任务会生成独立目录，并产出这些核心文件：
+
+- `task.json`
+- `artifacts/inventory.json`
+- `outputs/report.md`
+
+## 目录结构
+
+- `lab/`
+  - 本地服务与 intake 逻辑
+- `lab-data/`
+  - 任务数据、输入、workspace、日志、报告
+- `tools/`
+  - 启动和清理脚本
+- `docs/`
+  - MVP 目标与架构说明
+
+## 当前边界
+
+这是一个 MVP，不是完整平台。当前已经覆盖：
+
+- 开放入口
+- 首轮结构分析
+- 任务隔离
+
+当前还没有覆盖：
+
+- SSE 实时日志
+- 正式数据库
+- 自动 asset extraction
+- playbook / insight 自动晋升
+
+## 仓库关系
+
+- `Claude&GPTlocalinprove`
+  - 稳定 harness 主仓
+- `Claude&GPTlocalinprove-wt-step-8-search-autoresearch-pilot`
+  - 搜索实验仓库
+- `OpenLab`
+  - 独立 intake 与项目分析入口
